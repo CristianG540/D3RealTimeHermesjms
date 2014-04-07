@@ -1,0 +1,55 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+  <context:annotation-config />
+  	
+  <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	    <property name="url" value="${jdbc.url}" />
+	   <property name="driverClassName" value="${jdbc.driverClassName}" />
+	   <property name="username" value="${jdbc.username}" />
+	   <property name="password" value="${jdbc.password}" />
+	   <property name="removeAbandoned" value="true"/>
+	   <property name="initialSize" value="20" />
+	   <property name="maxActive" value="30" />
+  </bean>
+  
+  <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+  
+  <bean id="xmltoJsonDao" class="com.indra.s2m2.dao.XmltoJsonDao">
+      <property name="dataSource" ref="dataSource" />
+  </bean>
+  <bean id="xmltoJsonService" class="com.indra.s2m2.service.impl.XmltoJsonService"/>
+   
+   <bean id="lineaDataDao" class="com.indra.s2m2.dao.LineaDataDao">
+      <property name="dataSource" ref="dataSource" />
+  </bean>
+  <bean id="lineaDataService" class="com.indra.s2m2.service.impl.LineaDataService"/>
+   
+   <bean id="jsonArchiveDao" class="com.indra.s2m2.dao.JsonArchiveDao">
+      <property name="dataSource" ref="dataSource" />
+  </bean>
+  <bean id="notificationDao" class="com.indra.s2m2.dao.NotificationDao">
+      <property name="dataSource" ref="dataSource" />
+  </bean>
+   
+   <bean id="jsonArchiveDataService" class="com.indra.s2m2.service.impl.JsonArchiveDataService"/>
+   <!-- LoginService -->
+   <bean id="loginService" class="com.indra.s2m2.service.impl.LoginService"></bean>
+    <bean id="loginDao" class="com.indra.s2m2.dao.LoginDao">
+         <property name="dataSource" ref="dataSource" />
+    </bean>
+   
+   <!-- end -->
+   </beans>
+   
+	
+   
+  

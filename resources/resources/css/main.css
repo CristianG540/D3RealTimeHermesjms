@@ -1,0 +1,15 @@
+
+#headerIzq
+{
+background-image:url('../img/footer_franja.png');
+background-repeat:repeat-x;
+height: 61px;
+
+}
+#headerDer
+{
+background-image:url('../img/footer.png');
+height: 61px;
+width: 240px;
+float: right;
+}

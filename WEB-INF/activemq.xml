@@ -1,0 +1,178 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+  <context:annotation-config />
+
+	<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL">
+            <value>${AMQ_BROKER_URL}</value>
+        </property>
+    </bean>
+
+	<!-- JmsTemplate Definition -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+  	 <constructor-arg ref="jmsConnectionFactory"/>
+	</bean>
+
+	
+
+<bean id="xmltojsonQueueDest" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${TrainDataProducerDest}"/>
+</bean>
+<bean id="xmltojsoTopic" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${TrainDataProducerDest}"/>
+</bean>
+<bean id="prediccionesTopic" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${PrediccionesProducerDest}"/>
+</bean>
+
+<bean id="planExplotacionGSEDataToJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${PlanExplotacionGSEDataDest}"/>
+</bean>
+<bean id="planExplotacionGSEDataWebClientJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${planExplotacionGSEDataWebClientJson}"/>
+</bean>
+
+<bean id="trainDataWebClientJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${TrainDataProducerDestWebClientJson}"/>
+</bean>
+
+<bean id="prediccionesWebClientJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${PrediccionesProducerDestWebClientJson}"/>
+</bean>
+
+<bean id="horarioRealWebClientJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${horarioRealWebClientJson}"/>
+</bean>
+<bean id="horarioPrevistoWebClientJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${horarioPrevistoWebClientJson}"/>
+</bean>
+
+<bean id="horarioRealDest" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${HORARIO_REAL_TOPIC_DEST}"/>
+</bean>
+<bean id="horarioPrevistoDest" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${HORARIO_PREVISTO_TOPIC_DEST}"/>
+</bean>
+
+<bean id="notificationDest" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${notificationDest}"/>
+</bean>
+
+
+<!-- this is the Message Driven POJO (MDP) -->
+<bean id="messageListener" class="com.indra.s2m2.jms.consumer.JsonConversionConsumer" />
+<bean id="trainDataConsumer" class="com.indra.s2m2.jms.consumer.JsonConversionConsumer" />
+<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="planExplotacionGSEDataToJson"/>
+    <property name="messageListener" ref="messageListener" />
+</bean>
+
+<bean id="jmsTopicConsumer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="xmltojsoTopic"/>
+    <property name="messageListener" ref="trainDataConsumer" />
+</bean>
+
+
+
+<bean id="prediccionesConsumer" class="com.indra.s2m2.jms.consumer.JsonConversionConsumer" />
+<bean id="jmsPrediccionesTopicConsumer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="prediccionesTopic"/>
+    <property name="messageListener" ref="prediccionesConsumer" />
+</bean>
+
+
+<bean id="calculateDifferenceConsumer" class="com.indra.s2m2.jms.consumer.JsonConversionConsumer" />
+<bean id="calculateDifferenceDest" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${DifferenceCalulateDest}"/>
+</bean>
+<bean id="differenceCalulateWebClientJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${DifferenceCalulateWebClientJson}"/>
+</bean>
+
+<bean id="jmsCalculateDifferenceConsumerTopicConsumer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="calculateDifferenceDest"/>
+    <property name="messageListener" ref="calculateDifferenceConsumer" />
+</bean>
+
+<bean id="jmsHorarioRealTopic" class="com.indra.s2m2.jms.consumer.HorarioConversionConsumer" />
+
+<bean id="jmsHorarioRealTopicConsumber" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="horarioRealDest"/>
+    <property name="messageListener" ref="jmsHorarioRealTopic" />
+</bean>
+
+<bean id="jmsHorarioPrevistoTopic" class="com.indra.s2m2.jms.consumer.HorarioConversionConsumer" />
+
+<bean id="jmsHorarioPrevistoTopicConsumber" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="horarioPrevistoDest"/>
+    <property name="messageListener" ref="jmsHorarioPrevistoTopic" />
+</bean>
+
+<bean id="transferenceDest" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${tansferenceDest}"/>
+</bean>
+<bean id="tansferenceDestWebClientJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${tansferenceDestWebClientJson}"/>
+</bean>
+
+<bean id="jmsTransferenceTopic" class="com.indra.s2m2.jms.consumer.TransferenciasConsumer"/>
+<bean id="jmsTransferenceTopicConsumber" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="transferenceDest"/>
+    <property name="messageListener" ref="jmsTransferenceTopic" />
+</bean>
+
+<bean id="dateConversionDestWebClientJson" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${dateConversionWebClientJson}"/>
+</bean>
+<bean id="dateConversionDest" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${dateConversionDest}"/>
+</bean>
+
+<bean id="jmsDateConversionTopic" class="com.indra.s2m2.jms.consumer.DateConversionConsumer"/>
+<bean id="jmsDateConversionTopicConsumber" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="dateConversionDest"/>
+    <property name="messageListener" ref="jmsDateConversionTopic" />
+</bean>
+
+<bean id="jsonArchiveQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg value="MESSAGE_ARCHIVE_QUEUE"/>
+</bean>
+
+<bean id="jmsArchiveConsumer" class="com.indra.s2m2.jms.consumer.JsonArchiveConsumer"/>
+<bean id="JsonArchiveConsumer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="jsonArchiveQueue"/>
+    <property name="messageListener" ref="jmsArchiveConsumer" />
+</bean>
+
+<bean id="commonStompTopic" class="org.apache.activemq.command.ActiveMQTopic">
+    <constructor-arg value="${commonStompTopic}"/>
+</bean>
+<bean id="initRequestQueue" class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg value="INIT_REQUEST"/>
+</bean>
+<bean id="jsmRequestInitConsumer" class="com.indra.s2m2.jms.consumer.RequestInitateConsumer"/>
+<bean id="jsmRequestInitConsumerListener" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    <property name="destination" ref="initRequestQueue"/>
+    <property name="messageListener" ref="jsmRequestInitConsumer" />
+</bean>
+
+<!-- end -->
+
+</beans>

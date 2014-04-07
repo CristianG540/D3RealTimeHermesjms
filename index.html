@@ -1,0 +1,178 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    <style>
+        body {
+                font: 10px sans-serif;
+            }
+
+            #chart {
+                font: 10px sans-serif;
+            }
+
+            .noselect {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+
+            #text_hour {
+                font-weight: 600;
+                text-decoration : underline;
+            }
+
+            rect {
+                fill: #F5F5F3;
+                fill-opacity: .125;
+            }
+            
+            .rectTras {
+                fill: grey;
+                fill-opacity: 200;
+            }
+
+            .axis path, .axis line {
+                fill: none;
+                stroke: lightgrey; /*color de la */
+                shape-rendering: crispEdges;
+            }
+
+            .label {
+                background-color: #D90000;
+                color: #FFFFFF;
+                width: auto;
+            }
+
+            rect.zoom {
+                stroke: steelblue;
+                fill-opacity: 0.5;
+            }
+
+            .linea {
+                fill: none;
+                stroke: steelblue;
+                stroke-width: 1.5px;
+            }
+            
+            .LineaHorizontal {
+                stroke: #ddd;
+                stroke-dasharray: 1,1;
+                shape-rendering: crispEdges;
+            }
+
+            .brush .extent {
+                stroke: #0D0D0B;
+                fill-opacity: .125;
+                shape-rendering: crispEdges;
+            }
+
+            .dot {
+
+            }
+
+            .list {
+                padding-left: 16px;
+                padding-bottom: 10px;
+            }
+            .list li{
+                list-style: square;
+                padding: 2px;
+            }
+
+            pre {
+                font-size: 11px; 
+            }
+
+
+            div.tooltip {   
+                position: absolute;           
+                text-align: center;           
+                width: 60px;                  
+                height: 20px;                 
+                padding: 2px;             
+                font: 12px sans-serif;        
+                /*background: red;*/   
+                border: 0px;      
+                border-radius: 8px;           
+                pointer-events: none;         
+            }
+
+            #DatosUsuario {
+                position: absolute;
+                z-index: 1000;
+                margin: 1.4% 1% 1% 0.3%;
+            }
+
+            #TituloApp {
+                font-size: 45;
+            }
+    </style>
+
+    <link rel="stylesheet" href="resources/resources/css/smoothness/jquery-ui-1.9.2.custom.css" />
+    <link rel="stylesheet" media="all" type="text/css" href="resources/resources/css/jquery-ui-timepicker-addon.css" />
+    <!--<link rel="stylesheet" type="text/css" href="resources/resources/css/resources/css/clifton-green.css" />-->
+    <link rel="stylesheet" type="text/css" href="resources/resources/css/resources/css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="resources/resources/css/main.css" />
+
+    <script src="resources/resources/js/vendor/jquery-1.8.0.min.js"></script>
+    <script src="resources/resources/js/libs/jquery-ui-1.9.2.custom/jquery-ui-1.9.2.custom.js"></script>
+    <script type="text/javascript" src="resources/resources/js/libs/jQuery-Timepicker-Addon-master/jquery-ui-timepicker-addon.js"></script>
+    <script type="text/javascript" src="resources/resources/js/libs/jQuery-Timepicker-Addon-master/jquery-ui-sliderAccess.js"></script>
+    <script src="resources/resources/js/libs/d3-3.3.9/d3.min.js"></script>
+    <script src="resources/resources/js/libs/d3-3.3.9/d3.legend.js"></script>
+    <script type="text/javascript" src="resources/resources/js/stomp.js"></script>
+    <script type="text/javascript" src="resources/app/d3/DisplayGraphTime.js"></script>
+
+</head>
+
+<body onload="$('#NameUser').html('Usuario: '+localStorage.getItem('User'));GraficaPrueba.display();">
+
+    <script type="text/javascript">
+        if (window.WebSocket) {
+
+            var client, destination;
+            //var url = "ws://localhost:61614/stomp";
+            var url = "ws://localhost:61614";
+            var login = "guest";
+            var passcode = "guest";
+            client = Stomp.client(url);
+            client.connect(login, passcode, function(frame) {
+                headers = {};
+                headers.id = "sub-message-Client";
+                headers.persistent = true;
+                headers['activemq.prefetchSize'] = 5;
+                headers['activemq.subscriptionName'] = "masterbcast";
+
+                client.subscribe("/topic/s2m2/tren/real", function(message) {
+                    var Real = eval("(" + message.body + ")");
+                    jQuery.each(Real, function(key, val) {
+                        if (key === "LA") {
+                            console.log("////////////////////////////////////////PathInfoReal////////////////////////////////////////////////////////////");
+                            console.log(val);
+                            console.log("////////////////////////////////////////////////////////////////////////////////////////////////////");
+                            GraficaPrueba.PathInfoReal = val;
+                            //GraphD3SampleLineaL1.setPathInfoReal(val);
+                        } else {
+                            GraficaPrueba.PathInfoReal = val;
+                        };
+                    });
+
+                });
+
+                client.send("/queue/INIT_REQUEST", {
+                    priority: 9
+                }, "Initial Request");
+            });
+        };
+    </script>
+
+    <div id="ChartLineaA"></div>
+
+</body>
+
+</html>
